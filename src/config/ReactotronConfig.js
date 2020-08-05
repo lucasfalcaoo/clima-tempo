@@ -3,11 +3,8 @@ import { reactotronRedux } from 'reactotron-redux';
 import AsyncStorage from '@react-native-community/async-storage';
 
 if (__DEV__) {
-  // ip address
-  const host = '192.168.0.18';
-
   const tron = Reactotron.setAsyncStorageHandler(AsyncStorage)
-    .configure({ host })
+    .configure()
     .useReactNative()
     .use(reactotronRedux())
     .connect();
