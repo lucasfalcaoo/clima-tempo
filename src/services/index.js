@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-export const API_KEY = 'b5cb9753574cc8464bfa01c2e053c3a0';
+export const API_KEY = '7ac2499d';
 
 export const api = axios.create({
-  baseURL: 'http://apiadvisor.climatempo.com.br/api/v1/',
+  baseURL: 'https://api.hgbrasil.com/weather',
   timeout: 10000,
 });
