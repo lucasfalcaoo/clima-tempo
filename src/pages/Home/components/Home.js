@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { FlatList } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import NetInfo from '@react-native-community/netinfo';
 
 import Loader from '../../../components/Loader'
 import Wrapper from '../../../components/Wrapper'
-import { Title, Card, CardTitle, CardBody, CardText } from './styles';
+import WeatherItem from './WeatherItem';
+import { Title, Subtitle } from './styles';
 
 import { getWeatherByLocation } from '../store/thunk';
+import { handleLoading } from '../store/actions';
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -14,31 +19,49 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      const { status } = await Location.requestPermissionsAsync();
+      const { isConnected } = await NetInfo.fetch();
 
-      if (status !== 'granted') {
-        return console.log('Permission to access location was denied');
+      if (isConnected) {
+        const { status } = await Location.requestPermissionsAsync();
+
+        if (status !== 'granted') {
+          dispatch(handleLoading(false));
+          return console.log('Permission to access location was denied');
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+
+        dispatch(getWeatherByLocation(location.coords));
+      } else {
+        dispatch(handleLoading(false));
+        return console.log('Network connection fails!');
       }
-
-      const location = await Location.getCurrentPositionAsync({});
-
-      console.log('Location granted: ', location);
-
-      dispatch(getWeatherByLocation(location.coords));
     })();
   }, []);
 
   return (
     <Loader loading={loading}>
       <Wrapper>
-        <Title>{city}</Title>
-        <Card>
-          <CardTitle>Quarta (05/07)</CardTitle>
-          <CardBody>
-            <CardText>Teremos um dia Ensolarado</CardText>
-            <CardText>Min. 17˚ - Max. 18˚</CardText>
-          </CardBody>
-        </Card>
+        {forecast.length > 0
+          ? <>
+              <Title>{city}</Title>
+              <Subtitle>Veja a previsão do tempo na sua cidade</Subtitle>
+              <FlatList
+                data={forecast}
+                keyExtractor={item => item.date}
+                renderItem={({ item }) => <WeatherItem data={item} />}
+              />
+            </>
+          : <>
+              <Title>
+                Ative sua localização <Feather name="alert-triangle" size={24} color="#3792cb" />
+              </Title>
+              <Subtitle>
+                Precisamos da sua localização para carregar a previsão da sua
+                cidade. Por favor ative nas configurações do seu celular.
+              </Subtitle>
+            </>
+        }
       </Wrapper>
     </Loader>
   )

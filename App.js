@@ -13,6 +13,7 @@ export default function App() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
+        <StatusBar barStyle='dark-content' />
         <Container>
           <Home />
         </Container>
